@@ -35,9 +35,10 @@ REM --- Step 6: 获取上游仓库的最新更改 ---
 echo 正在获取上游仓库的最新更改...
 git fetch upstream
 
-REM --- Step 7: 显示当前分支 ---
-echo 当前分支是：
-git branch --show-current
+REM --- Step 7: 获取当前分支名 ---
+FOR /F "tokens=*" %%i IN ('git branch --show-current') DO SET CURRENT_BRANCH=%%i
+
+echo 当前分支是：%CURRENT_BRANCH%
 echo 请确认您在正确的分支上（例如 main 或 master），然后按任意键继续。
 pause
 
@@ -47,7 +48,7 @@ set /p choice=
 IF /I "%choice%"=="Y" (
     REM --- Step 9: 合并上游更改 ---
     echo 正在合并上游仓库的更改...
-    git merge upstream/master
+    git merge upstream/%CURRENT_BRANCH%
     IF %ERRORLEVEL% NEQ 0 (
         echo 合并失败！请手动解决冲突并按任意键继续。
         pause
@@ -69,7 +70,7 @@ git commit -m "添加 sync_with_upstream.bat 文件"
 
 REM --- Step 11: 强制推送到远程仓库 ---
 echo 正在强制推送更改到远程仓库，以确保与上游仓库同步...
-git push origin master --force
+git push origin %CURRENT_BRANCH% --force
 IF %ERRORLEVEL% NEQ 0 (
     echo 推送失败！请检查远程仓库设置。
     pause
