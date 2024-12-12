@@ -42,11 +42,18 @@ echo 当前分支是：%CURRENT_BRANCH%
 echo 请确认您在正确的分支上（例如 main 或 master），然后按任意键继续。
 pause
 
-REM --- Step 8: 提示用户是否继续合并 ---
+REM --- Step 8: 检查远程仓库配置 ---
+git remote -v | findstr origin >nul
+IF %ERRORLEVEL% NEQ 0 (
+    echo 远程仓库 "origin" 未配置，正在添加远程仓库...
+    git remote add origin https://github.com/wwjj999/minigtp.git
+)
+
+REM --- Step 9: 提示用户是否继续合并 ---
 echo 您是否要将上游仓库的更改合并到您的本地分支？[Y/N]
 set /p choice=
 IF /I "%choice%"=="Y" (
-    REM --- Step 9: 合并上游更改 ---
+    REM --- Step 10: 合并上游更改 ---
     echo 正在合并上游仓库的更改...
     git merge upstream/%CURRENT_BRANCH%
     IF %ERRORLEVEL% NEQ 0 (
@@ -60,7 +67,7 @@ IF /I "%choice%"=="Y" (
     exit /b
 )
 
-REM --- Step 10: 检查并处理未跟踪文件 ---
+REM --- Step 11: 检查并处理未跟踪文件 ---
 echo 正在检查是否有未跟踪的文件...
 git status
 
@@ -68,7 +75,7 @@ REM 如果有未跟踪文件（例如 sync_with_upstream.bat），自动添加�
 git add sync_with_upstream.bat
 git commit -m "添加 sync_with_upstream.bat 文件"
 
-REM --- Step 11: 强制推送到远程仓库 ---
+REM --- Step 12: 强制推送到远程仓库 ---
 echo 正在强制推送更改到远程仓库，以确保与上游仓库同步...
 git push origin %CURRENT_BRANCH% --force
 IF %ERRORLEVEL% NEQ 0 (
